@@ -1,7 +1,7 @@
 const multer = require("multer");
 const XLSX = require("xlsx");
 const path = require("path");
-const https = require('https');
+const https = require("https");
 
 // Multer 설정
 const storage = multer.diskStorage({
@@ -21,16 +21,18 @@ exports.index = function (req, res) {
 
 // 스크립트 제공 (TMAP API 키 숨김)
 exports.getScript = function (req, res) {
-  const apiKey = 'VxOtMgjZGc7kTP50VWRKC62WBf2QRzxeaz2ViIqB'; 
+  const apiKey = "VxOtMgjZGc7kTP50VWRKC62WBf2QRzxeaz2ViIqB";
   const url = `https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=${apiKey}`;
 
-  https.get(url, (tmapRes) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    tmapRes.pipe(res);
-  }).on('error', (e) => {
-    console.error(e);
-    res.status(500).send('Error fetching TMAP script');
-  });
+  https
+    .get(url, (tmapRes) => {
+      res.setHeader("Content-Type", "application/javascript");
+      tmapRes.pipe(res);
+    })
+    .on("error", (e) => {
+      console.error(e);
+      res.status(500).send("Error fetching TMAP script");
+    });
 };
 
 // 엑셀 파일 업로드 처리
@@ -72,19 +74,17 @@ exports.uploadExcel = function (req, res) {
         data.forEach((row, index) => {
           console.log(`행 ${index + 1}:`, row);
           if (row.title && row.latitude && row.longitude) {
-            // title을 poi_name으로, latitude/longitude를 poi_lat/poi_lng로 매핑
-            // poi_id는 자동 생성되므로 null, poi_address는 title과 동일하게 설정
             values.push(
               `($${index * 5 + 1}, $${index * 5 + 2}, $${index * 5 + 3}, $${
                 index * 5 + 4
               }, $${index * 5 + 5})`
             );
             params.push(
-              `POI_${index + 1}`, // poi_id: 자동 생성
-              row.title, // poi_name: title
-              row.title, // poi_address: title과 동일
-              row.latitude, // poi_lat: latitude
-              row.longitude // poi_lng: longitude
+              `POI_${index + 1}`,
+              row.title,
+              row.title,
+              row.latitude,
+              row.longitude
             );
           } else {
             console.log(`행 ${index + 1}에서 필수 필드 누락:`, row);
